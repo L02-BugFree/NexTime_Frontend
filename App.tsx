@@ -1,20 +1,46 @@
+import React from 'react';
+import { Platform, View, StyleSheet } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { AppNavigator } from './src/navigation/AppNavigator';
 
 export default function App() {
-  return (
-    <View style={styles.container}>
-      <Text>Open up App.tsx to start working on your app!</Text>
+  const content = (
+    <SafeAreaProvider>
       <StatusBar style="auto" />
-    </View>
+      <AppNavigator />
+    </SafeAreaProvider>
   );
+
+  if (Platform.OS === 'web') {
+    return (
+      <View style={styles.webDesktopBackground}>
+        <View style={styles.webMobileFrame}>
+          {content}
+        </View>
+      </View>
+    );
+  }
+
+  return content;
 }
 
 const styles = StyleSheet.create({
-  container: {
+  webDesktopBackground: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#0F172A', // Sleek dark desktop background
     alignItems: 'center',
     justifyContent: 'center',
+    padding: 20,
+  },
+  webMobileFrame: {
+    width: 400,
+    height: 820,
+    backgroundColor: '#F5F6FA',
+    borderRadius: 40,
+    overflow: 'hidden',
+    boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
+    borderWidth: 10,
+    borderColor: '#1E293B',
   },
 });
