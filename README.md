@@ -1,4 +1,4 @@
-# 🕒 NexTime - Smart Group Coordination Ecosystem
+# NexTime - Smart Group Coordination Ecosystem
 **Frontend Mobile Application (React Native / Expo / TypeScript)**
 
 ![Platform](https://img.shields.io/badge/Platform-iOS%20%7C%20Android%20%7C%20Web-blue?style=for-the-badge&logo=expo)
@@ -8,31 +8,31 @@
 
 ---
 
-## 🌟 Giới thiệu (Overview)
+## Giới thiệu
 **NexTime** là hệ sinh thái hỗ trợ điều phối nhóm thông minh, hoạt động như một "productivity layer" giúp loại bỏ hoàn toàn sự chồng chéo trong việc lên lịch trình và theo dõi tiến độ công việc nhóm.
 
 Ứng dụng di động NexTime mang đến giao diện hiện đại, tối ưu hoá với tông màu chủ đạo `#0066FF`, mang lại trải nghiệm mượt mà trên cả 3 nền tảng: **iOS, Android và Web**.
 
 ---
 
-## 🔥 Tính năng cốt lõi (Key Features)
+## Tính năng cốt lõi
 
-### 1. 📅 Visual Synchronization (Bản đồ nhiệt Lịch trình)
-- Tự động so khớp và hiển thị trực quan các khoảng thời gian rảnh/bận của các thành viên trong nhóm thông qua thuật toán **Heatmap** (màu sắc biểu thị độ bận từ Level 1 đến Level 5).
+### 1. Bản đồ nhiệt lịch trình (Visual Synchronization)
+- Tự động so khớp và hiển thị trực quan các khoảng thời gian rảnh/bận của các thành viên trong nhóm thông qua thuật toán Heatmap (màu sắc biểu thị độ bận từ Level 1 đến Level 5).
 - Tích hợp tuỳ chọn ẩn danh hoặc công khai linh hoạt, bảo đảm quyền riêng tư tuyệt đối cho người dùng.
 
-### 2. 🤖 Driven Automation (AI Prompt-to-Checklist)
-- Tích hợp **AI Trợ lý** hỗ trợ phân tích trực tiếp các đoạn hội thoại, tin nhắn hoặc mô tả thô.
-- Tự động trích xuất và đề xuất các đầu việc thành checklist quản lý tiến độ thông minh chỉ với 1 nút bấm.
+### 2. Tự động hóa tác vụ (Driven Automation / AI Prompt)
+- Tích hợp AI Trợ lý hỗ trợ phân tích trực tiếp các đoạn hội thoại, tin nhắn hoặc mô tả thô.
+- Tự động trích xuất và đề xuất các đầu việc thành checklist quản lý tiến độ thông minh chỉ với một thao tác xác nhận.
 
-### 3. 💬 Seamless Accountability (Nhắn tin & Theo dõi)
+### 3. Giao tiếp & Theo dõi tiến độ (Seamless Accountability)
 - Hệ thống phòng chat nhóm và cá nhân thời gian thực (Real-time messaging).
 - Quản lý đầu việc gắn liền với từng phòng chat, từ khâu lên ý tưởng, bình chọn lịch biểu đến hoàn thành tác vụ.
 
 ---
 
-## 📂 Cấu trúc thư mục (Project Structure)
-Dự án được cấu trúc theo chuẩn **Clean Architecture / Feature-based** kết hợp với **Service Layer**, giúp dễ dàng mở rộng và bảo trì:
+## Cấu trúc thư mục
+Dự án được cấu trúc theo chuẩn Clean Architecture / Feature-based kết hợp với Service Layer, giúp dễ dàng mở rộng và bảo trì:
 
 ```plaintext
 src/
@@ -55,28 +55,28 @@ src/
 
 ---
 
-## 🚀 Hướng dẫn cài đặt và khởi chạy (Getting Started)
+## Hướng dẫn cài đặt và khởi chạy
 
-### 1. Yêu cầu hệ thống (Prerequisites)
-- [Node.js](https://nodejs.org/) (Phiên bản v18.x hoặc v20.x trở lên)
-- [Expo CLI](https://expo.dev/)
+### 1. Yêu cầu hệ thống
+- Node.js (Phiên bản v18.x hoặc v20.x trở lên)
+- Expo CLI
 
-### 2. Cài đặt thư viện (Installation)
+### 2. Cài đặt thư viện
 Mở Terminal tại thư mục gốc của dự án và chạy:
 ```bash
 npm install
 ```
 
-### 3. Khởi chạy ứng dụng (Running the App)
+### 3. Khởi chạy ứng dụng
 
 #### Chạy trên nền tảng Web (Khuyên dùng khi phát triển trên máy tính):
-Ứng dụng được cấu hình bọc trong một **Khung điện thoại ảo (Mobile Phone Mockup Frame)** sang trọng, mang lại trải nghiệm mobile hoàn hảo ngay trên trình duyệt:
+Ứng dụng được cấu hình bọc trong một Khung điện thoại ảo (Mobile Phone Mockup Frame) sang trọng, mang lại trải nghiệm mobile hoàn hảo ngay trên trình duyệt:
 ```bash
 npm run web
 ```
 *(Nếu cần xóa bộ nhớ đệm cache, chạy: `npm run web -- -c`)*
 
-#### Chạy trên thiết bị di động / Máy ảo (Mobile Devices):
+#### Chạy trên thiết bị di động hoặc máy ảo:
 ```bash
 npx expo start
 ```
@@ -85,11 +85,11 @@ npx expo start
 
 ---
 
-## 🔗 Liên kết hệ thống (Links & References)
+## Liên kết hệ thống
 - **Figma Design:** [NexTime Mobile App Design](https://www.figma.com/proto/EQlP4wl60RQoijFUXdxk00/NexTime-Mobile-App-Design?node-id=615-3226)
 - **API Swagger Document:** [https://nextime-mobile-app.onrender.com/api-docs](https://nextime-mobile-app.onrender.com/api-docs)
 
 ---
 <div align="center">
-  <p>Được thiết kế và phát triển với 💙 cho hệ sinh thái NexTime.</p>
+  <p>Được thiết kế và phát triển cho hệ sinh thái NexTime.</p>
 </div>
