@@ -116,7 +116,7 @@ const MainNavigator = () => (
 
 export const AppNavigator = () => (
   <NavigationContainer>
-    <RootStack.Navigator screenOptions={{ headerShown: false }} initialRouteName="Landing">
+    <RootStack.Navigator screenOptions={{ headerShown: false }} initialRouteName="Main">
       <RootStack.Screen name="Landing" component={LandingScreen} />
       <RootStack.Screen name="Auth" component={AuthNavigator} />
       <RootStack.Screen name="Main" component={MainNavigator} />

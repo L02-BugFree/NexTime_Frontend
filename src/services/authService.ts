@@ -22,7 +22,7 @@ export const login = async (payload: LoginRequest): Promise<AuthResponse> => {
   const data = response.data;
 
   // Hỗ trợ linh hoạt nhiều định dạng response từ Backend
-  const jwtToken = data?.token || data?.accessToken || data?.tokens?.accessToken;
+  const jwtToken = data?.token || data?.access_token || data?.tokens?.accessToken;
   const refreshToken = data?.refreshToken || data?.tokens?.refreshToken;
 
   if (jwtToken) {
@@ -45,7 +45,7 @@ export const register = async (payload: RegisterRequest): Promise<AuthResponse> 
   const response = await axiosClient.post<any>(AUTH_ENDPOINTS.REGISTER, payload);
   const data = response.data;
 
-  const jwtToken = data?.token || data?.accessToken || data?.tokens?.accessToken;
+  const jwtToken = data?.token || data?.access_token || data?.tokens?.accessToken;
   const refreshToken = data?.refreshToken || data?.tokens?.refreshToken;
 
   if (jwtToken) {
