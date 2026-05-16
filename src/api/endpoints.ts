@@ -1,35 +1,64 @@
 // ─── Authentication ───────────────────────────────────────────────────────────
 export const AUTH_ENDPOINTS = {
-  LOGIN: '/auth/login',
   REGISTER: '/auth/register',
+  LOGIN: '/auth/login',
+  GOOGLE: '/auth/google',
+  FORGOT_PASSWORD: '/auth/forgot-password',
+  RESET_PASSWORD: '/auth/reset-password',
   LOGOUT: '/auth/logout',
-  REFRESH_TOKEN: '/auth/refresh',
-  ME: '/auth/me',
+} as const;
+
+// ─── User ──────────────────────────────────────────────────────────────────
+export const USER_ENDPOINTS = {
+  ME: '/users/me',
+  UPDATE_PROFILE: '/users/profile',
+  UPDATE_PRIVACY: '/users/privacy',
+  UPDATE_VISIBILITY: '/users/visibility',
+  GET_QR: '/users/qr',
+  DELETE_ACCOUNT: '/users/account',
+  SEARCH: '/users/search',
+  FRIENDS_REQUEST: '/users/friends/request',
+  FRIENDS_ACCEPT: '/users/friends/accept',
+  FRIENDS_REMOVE: (friendId: string) => `/users/friends/${friendId}`,
+  FRIENDS_LIST: '/users/friends',
+  BLOCKS_ADD: '/users/blocks',
+  BLOCKS_LIST: '/users/blocks',
+  BLOCKS_REMOVE: (targetUserId: string) => `/users/blocks/${targetUserId}`,
 } as const;
 
 // ─── Schedule ─────────────────────────────────────────────────────────────────
 export const SCHEDULE_ENDPOINTS = {
-  LIST: '/schedules',
-  DETAIL: (id: string) => `/schedules/${id}`,
-  CREATE: '/schedules',
-  UPDATE: (id: string) => `/schedules/${id}`,
-  DELETE: (id: string) => `/schedules/${id}`,
+  CREATE_WEEKLY: '/schedule/weekly',
+  CREATE_ONESHOT: '/schedule/oneshot',
+  GET_MONTHLY: '/schedule/monthly',
+  GET_HEATMAP: (groupId: string) => `/schedule/heatmap/${groupId}`,
+  UPDATE: (eventId: string) => `/schedule/${eventId}`,
+  DELETE: (eventId: string) => `/schedule/${eventId}`,
 } as const;
 
-// ─── Checklist ────────────────────────────────────────────────────────────────
-export const CHECKLIST_ENDPOINTS = {
-  LIST: '/checklists',
-  DETAIL: (id: string) => `/checklists/${id}`,
-  CREATE: '/checklists',
-  UPDATE: (id: string) => `/checklists/${id}`,
-  DELETE: (id: string) => `/checklists/${id}`,
-  TOGGLE_ITEM: (checklistId: string, itemId: string) =>
-    `/checklists/${checklistId}/items/${itemId}/toggle`,
+// ─── Group ──────────────────────────────────────────────────────────────────
+export const GROUP_ENDPOINTS = {
+  CREATE: '/group',
+  GET: '/group',
+  HEATMAP: (id: string) => `/group/heatmap/${id}`,
 } as const;
 
-// ─── Profile ──────────────────────────────────────────────────────────────────
-export const PROFILE_ENDPOINTS = {
-  GET: '/profile',
-  UPDATE: '/profile',
-  UPLOAD_AVATAR: '/profile/avatar',
+// ─── Rooms ──────────────────────────────────────────────────────────────────
+export const ROOM_ENDPOINTS = {
+  CREATE: '/rooms',
+  GET: '/rooms',
+  GET_MESSAGES: (roomId: string) => `/rooms/${roomId}/messages`,
+  SEND_MESSAGE: (roomId: string) => `/rooms/${roomId}/messages`,
+  HEATMAP: (roomId: string) => `/rooms/${roomId}/heatmap`,
+} as const;
+
+// ─── Polls ──────────────────────────────────────────────────────────────────
+export const POLL_ENDPOINTS = {
+  CREATE: '/polls',
+  VOTE: (pollId: string) => `/polls/${pollId}/vote`,
+} as const;
+
+// ─── Checklist / App ────────────────────────────────────────────────────────
+export const APP_ENDPOINTS = {
+  ROOT: '/',
 } as const;

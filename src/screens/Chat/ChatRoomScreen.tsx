@@ -8,14 +8,26 @@ import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { ChatStackParamList } from '../../navigation/AppNavigator';
 import { getRoomMessages, sendMessage } from '../../services/roomService';
 import { Message } from '../../types';
+import { colors } from '../../theme/colors';
+import { typography } from '../../theme/typography';
+import { Avatar } from '../../components/ui/Avatar';
+import { PollCard } from '../../components/chat/PollCard';
+import { ChecklistCard } from '../../components/chat/ChecklistCard';
 
 type Route = RouteProp<ChatStackParamList, 'ChatRoom'>;
+
+// Bổ sung type mở rộng cho UI demo
+interface ExtendedMessage extends Message {
+  uiType?: 'text' | 'poll' | 'checklist';
+  pollData?: any;
+  checklistData?: any;
+}
 
 export const ChatRoomScreen: React.FC = () => {
   const navigation = useNavigation<any>();
   const route = useRoute<Route>();
   const { roomId, roomName } = route.params;
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [messages, setMessages] = useState<ExtendedMessage[]>([]);
   const [loading, setLoading] = useState(true);
   const [text, setText] = useState('');
   const [sending, setSending] = useState(false);
@@ -24,7 +36,39 @@ export const ChatRoomScreen: React.FC = () => {
   const loadMessages = async () => {
     try {
       setLoading(true);
-      setMessages(await getRoomMessages(roomId));
+      const data = await getRoomMessages(roomId);
+      
+      // Inject Mock Data cho Poll và Checklist để xem UI
+      const mockMessages: ExtendedMessage[] = [
+        { id: 'm1', roomId, senderId: 's1', senderName: 'Quốc Việt', content: 'Tuần sau tụi mình họp nha', isOwn: false, uiType: 'text' },
+        { id: 'm2', roomId, senderId: 's2', senderName: 'Bạn', content: 'Khi meet vậy ô?', isOwn: true, uiType: 'text' },
+        { id: 'm3', roomId, senderId: 's1', senderName: 'Quốc Việt', content: 'Để t check lịch của mng cái rồi chốt nhe', isOwn: false, uiType: 'text' },
+        { 
+          id: 'm4', roomId, senderId: 's1', senderName: 'Quốc Việt', content: '', isOwn: false, 
+          uiType: 'poll', 
+          pollData: {
+            question: 'Chiều mai 3h họp đc hết mà đúng ko?',
+            totalVotes: 12,
+            options: [
+              { id: 'opt1', text: 'Oke', votes: 11, votedByMe: true },
+              { id: 'opt2', text: 'Ko (nêu lý do)', votes: 1, votedByMe: false }
+            ]
+          }
+        },
+        { 
+          id: 'm5', roomId, senderId: 's3', senderName: 'Harry', content: '', isOwn: false, 
+          uiType: 'checklist', 
+          checklistData: {
+            title: 'Chuẩn bị cho buổi họp',
+            items: [
+              { id: 'i1', text: 'Đọc trước tài liệu', completed: true },
+              { id: 'i2', text: 'Chuẩn bị câu hỏi', completed: false }
+            ]
+          }
+        },
+      ];
+      
+      setMessages([...data, ...mockMessages]);
     } catch { } finally { setLoading(false); }
   };
 
@@ -37,25 +81,40 @@ export const ChatRoomScreen: React.FC = () => {
     try {
       setSending(true);
       const msg = await sendMessage(roomId, content);
-      setMessages(prev => [...prev, msg]);
+      setMessages(prev => [...prev, { ...msg, uiType: 'text' }]);
       setTimeout(() => listRef.current?.scrollToEnd({ animated: true }), 100);
     } catch { } finally { setSending(false); }
   };
 
-  const renderMessage = ({ item }: { item: Message }) => {
+  const renderMessage = ({ item }: { item: ExtendedMessage }) => {
     const isMine = item.isOwn ?? false;
+    
+    // Render Custom Cards
+    let customContent = null;
+    if (item.uiType === 'poll' && item.pollData) {
+      customContent = <PollCard {...item.pollData} />;
+    } else if (item.uiType === 'checklist' && item.checklistData) {
+      customContent = <ChecklistCard {...item.checklistData} />;
+    }
+
     return (
       <View style={[s.msgRow, isMine && s.msgRowMine]}>
         {!isMine && (
-          <View style={s.msgAvatar}>
-            <Text style={s.msgAvatarTxt}>{(item.senderName || 'U')[0].toUpperCase()}</Text>
-          </View>
+          <Avatar size={28} name={item.senderName || 'U'} style={{ marginBottom: 4 }} />
         )}
-        <View style={[s.msgBubble, isMine ? s.msgBubbleMine : s.msgBubbleOther]}>
+        <View style={s.msgContentArea}>
           {!isMine && <Text style={s.msgSender}>{item.senderName || 'Người dùng'}</Text>}
-          <Text style={[s.msgText, isMine && s.msgTextMine]}>{item.content}</Text>
+          
+          {customContent ? (
+            customContent
+          ) : (
+            <View style={[s.msgBubble, isMine ? s.msgBubbleMine : s.msgBubbleOther]}>
+              <Text style={[s.msgText, isMine && s.msgTextMine]}>{item.content}</Text>
+            </View>
+          )}
+
           <Text style={[s.msgTime, isMine && s.msgTimeMine]}>
-            {item.createdAt ? new Date(item.createdAt).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }) : ''}
+            {item.createdAt ? new Date(item.createdAt).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }) : '16:50'}
           </Text>
         </View>
       </View>
@@ -67,25 +126,23 @@ export const ChatRoomScreen: React.FC = () => {
       {/* Header */}
       <View style={s.header}>
         <TouchableOpacity style={s.backBtn} onPress={() => navigation.goBack()}>
-          <Ionicons name="chevron-back" size={24} color="#0F172A" />
+          <Ionicons name="chevron-back" size={24} color={colors.text} />
         </TouchableOpacity>
         <View style={s.headerCenter}>
-          <View style={s.headerAvatar}>
-            <Ionicons name="people" size={20} color="#FFFFFF" />
-          </View>
+          <Avatar size={36} name={roomName} />
           <View>
             <Text style={s.hName} numberOfLines={1}>{roomName}</Text>
             <Text style={s.hStatus}>Đang hoạt động</Text>
           </View>
         </View>
         <TouchableOpacity style={s.hBtn}>
-          <Ionicons name="ellipsis-vertical" size={22} color="#0F172A" />
+          <Ionicons name="ellipsis-vertical" size={22} color={colors.text} />
         </TouchableOpacity>
       </View>
 
       {/* Messages */}
       {loading ? (
-        <View style={s.center}><ActivityIndicator size="large" color="#0066FF" /></View>
+        <View style={s.center}><ActivityIndicator size="large" color={colors.primary} /></View>
       ) : (
         <FlatList
           ref={listRef}
@@ -95,7 +152,7 @@ export const ChatRoomScreen: React.FC = () => {
           contentContainerStyle={s.msgList}
           ListEmptyComponent={
             <View style={s.empty}>
-              <Ionicons name="chatbubbles-outline" size={48} color="#CBD5E1" />
+              <Ionicons name="chatbubbles-outline" size={48} color={colors.border} />
               <Text style={s.emptyTxt}>Hãy bắt đầu cuộc trò chuyện!</Text>
             </View>
           }
@@ -106,29 +163,24 @@ export const ChatRoomScreen: React.FC = () => {
       {/* Input */}
       <View style={s.inputBar}>
         <TouchableOpacity style={s.inputBtn}>
-          <Ionicons name="add-circle-outline" size={26} color="#0066FF" />
+          <Ionicons name="add-circle-outline" size={26} color={colors.textSecondary} />
         </TouchableOpacity>
         <TextInput
           style={s.input}
           placeholder="Type message..."
-          placeholderTextColor="#CBD5E1"
+          placeholderTextColor={colors.textSecondary}
           value={text}
           onChangeText={setText}
           multiline
           maxLength={1000}
-          returnKeyType="send"
-          onSubmitEditing={handleSend}
         />
-        <TouchableOpacity style={s.inputBtn}>
-          <Ionicons name="happy-outline" size={24} color="#94A3B8" />
-        </TouchableOpacity>
         {text.trim() ? (
           <TouchableOpacity style={s.sendBtn} onPress={handleSend} disabled={sending}>
-            {sending ? <ActivityIndicator size="small" color="#FFF" /> : <Ionicons name="send" size={18} color="#FFFFFF" />}
+            {sending ? <ActivityIndicator size="small" color="#FFF" /> : <Ionicons name="send" size={18} color={colors.white} />}
           </TouchableOpacity>
         ) : (
           <TouchableOpacity style={s.inputBtn}>
-            <Ionicons name="mic-outline" size={24} color="#94A3B8" />
+            <Ionicons name="mic-outline" size={24} color={colors.textSecondary} />
           </TouchableOpacity>
         )}
       </View>
@@ -137,32 +189,30 @@ export const ChatRoomScreen: React.FC = () => {
 };
 
 const s = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F8FAFC' },
-  header: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#FFFFFF', paddingHorizontal: 12, paddingTop: 52, paddingBottom: 12, borderBottomWidth: 1, borderBottomColor: '#F1F5F9', elevation: 2, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 4 },
+  container: { flex: 1, backgroundColor: colors.background },
+  header: { flexDirection: 'row', alignItems: 'center', backgroundColor: colors.white, paddingHorizontal: 12, paddingTop: Platform.OS === 'ios' ? 52 : 30, paddingBottom: 12, borderBottomWidth: 1, borderBottomColor: colors.border },
   backBtn: { width: 40, height: 40, alignItems: 'center', justifyContent: 'center' },
   headerCenter: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 10 },
-  headerAvatar: { width: 36, height: 36, borderRadius: 18, backgroundColor: '#0066FF', alignItems: 'center', justifyContent: 'center' },
-  hName: { fontSize: 15, fontWeight: '700', color: '#0F172A', maxWidth: 180 },
-  hStatus: { fontSize: 11, color: '#10B981', fontWeight: '600' },
+  hName: { ...typography.body1, fontWeight: '700', color: colors.text, maxWidth: 180 },
+  hStatus: { ...typography.caption, color: colors.success, fontWeight: '600' },
   hBtn: { width: 40, height: 40, alignItems: 'center', justifyContent: 'center' },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  msgList: { padding: 16, gap: 12, paddingBottom: 8 },
+  msgList: { padding: 16, gap: 16, paddingBottom: 8 },
   msgRow: { flexDirection: 'row', alignItems: 'flex-end', gap: 8 },
   msgRowMine: { justifyContent: 'flex-end' },
-  msgAvatar: { width: 28, height: 28, borderRadius: 14, backgroundColor: '#8B5CF6', alignItems: 'center', justifyContent: 'center', marginBottom: 4 },
-  msgAvatarTxt: { fontSize: 11, fontWeight: '800', color: '#FFFFFF' },
-  msgBubble: { maxWidth: '75%', padding: 12, borderRadius: 16 },
-  msgBubbleOther: { backgroundColor: '#FFFFFF', borderBottomLeftRadius: 4, elevation: 1, shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.05, shadowRadius: 2 },
-  msgBubbleMine: { backgroundColor: '#0066FF', borderBottomRightRadius: 4 },
-  msgSender: { fontSize: 11, fontWeight: '700', color: '#0066FF', marginBottom: 4 },
-  msgText: { fontSize: 14, color: '#0F172A', lineHeight: 20 },
-  msgTextMine: { color: '#FFFFFF' },
-  msgTime: { fontSize: 10, color: '#94A3B8', marginTop: 4, textAlign: 'right' },
-  msgTimeMine: { color: 'rgba(255,255,255,0.7)' },
+  msgContentArea: { alignItems: 'flex-start', maxWidth: '85%' },
+  msgBubble: { paddingHorizontal: 16, paddingVertical: 12, borderRadius: 20 },
+  msgBubbleOther: { backgroundColor: colors.surfaceHighlight, borderBottomLeftRadius: 4 },
+  msgBubbleMine: { backgroundColor: colors.primary, borderBottomRightRadius: 4 },
+  msgSender: { ...typography.caption, fontWeight: '600', color: colors.textSecondary, marginBottom: 4, marginLeft: 4 },
+  msgText: { ...typography.body1, color: colors.text },
+  msgTextMine: { color: colors.white },
+  msgTime: { ...typography.caption, fontSize: 10, color: colors.textSecondary, marginTop: 4, alignSelf: 'flex-start', marginLeft: 4 },
+  msgTimeMine: { alignSelf: 'flex-end', marginRight: 4 },
   empty: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 12, paddingTop: 80 },
-  emptyTxt: { fontSize: 15, color: '#94A3B8', textAlign: 'center' },
-  inputBar: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#FFFFFF', paddingHorizontal: 8, paddingVertical: 8, borderTopWidth: 1, borderTopColor: '#F1F5F9', gap: 4 },
+  emptyTxt: { ...typography.body2, color: colors.textSecondary, textAlign: 'center' },
+  inputBar: { flexDirection: 'row', alignItems: 'center', backgroundColor: colors.white, paddingHorizontal: 8, paddingVertical: 8, borderTopWidth: 1, borderTopColor: colors.border, gap: 4 },
   inputBtn: { width: 40, height: 40, alignItems: 'center', justifyContent: 'center' },
-  input: { flex: 1, backgroundColor: '#F8FAFC', borderRadius: 20, paddingHorizontal: 14, paddingVertical: 10, fontSize: 14, color: '#0F172A', maxHeight: 100 },
-  sendBtn: { width: 40, height: 40, borderRadius: 20, backgroundColor: '#0066FF', alignItems: 'center', justifyContent: 'center' },
+  input: { flex: 1, backgroundColor: colors.surface, borderRadius: 20, paddingHorizontal: 16, paddingVertical: 10, ...typography.body1, color: colors.text, maxHeight: 100 },
+  sendBtn: { width: 40, height: 40, borderRadius: 20, backgroundColor: colors.primary, alignItems: 'center', justifyContent: 'center', marginLeft: 4 },
 });
