@@ -5,7 +5,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
-import { ChatStackParamList } from '../../navigation/AppNavigator';
+import { RootStackParamList } from '../../navigation/AppNavigator';
 import { getRoomMessages, sendMessage } from '../../services/roomService';
 import { Message } from '../../types';
 import { colors } from '../../theme/colors';
@@ -14,7 +14,7 @@ import { Avatar } from '../../components/ui/Avatar';
 import { PollCard } from '../../components/chat/PollCard';
 import { ChecklistCard } from '../../components/chat/ChecklistCard';
 
-type Route = RouteProp<ChatStackParamList, 'ChatRoom'>;
+type Route = RouteProp<RootStackParamList, 'ChatRoom'>;
 
 // Bổ sung type mở rộng cho UI demo
 interface ExtendedMessage extends Message {
@@ -40,12 +40,13 @@ export const ChatRoomScreen: React.FC = () => {
       
       // Inject Mock Data cho Poll và Checklist để xem UI
       const mockMessages: ExtendedMessage[] = [
-        { id: 'm1', roomId, senderId: 's1', senderName: 'Quốc Việt', content: 'Tuần sau tụi mình họp nha', isOwn: false, uiType: 'text' },
-        { id: 'm2', roomId, senderId: 's2', senderName: 'Bạn', content: 'Khi meet vậy ô?', isOwn: true, uiType: 'text' },
-        { id: 'm3', roomId, senderId: 's1', senderName: 'Quốc Việt', content: 'Để t check lịch của mng cái rồi chốt nhe', isOwn: false, uiType: 'text' },
+        { id: 'm1', roomId, senderId: 's1', senderName: 'Quốc Việt', content: 'Tuần sau tụi mình họp nha', isOwn: false, uiType: 'text', createdAt: new Date().toISOString() },
+        { id: 'm2', roomId, senderId: 's2', senderName: 'Bạn', content: 'Khi meet vậy ô?', isOwn: true, uiType: 'text', createdAt: new Date().toISOString() },
+        { id: 'm3', roomId, senderId: 's1', senderName: 'Quốc Việt', content: 'Để t check lịch của mng cái rồi chốt nhe', isOwn: false, uiType: 'text', createdAt: new Date().toISOString() },
         { 
           id: 'm4', roomId, senderId: 's1', senderName: 'Quốc Việt', content: '', isOwn: false, 
           uiType: 'poll', 
+          createdAt: new Date().toISOString(),
           pollData: {
             question: 'Chiều mai 3h họp đc hết mà đúng ko?',
             totalVotes: 12,
@@ -58,6 +59,7 @@ export const ChatRoomScreen: React.FC = () => {
         { 
           id: 'm5', roomId, senderId: 's3', senderName: 'Harry', content: '', isOwn: false, 
           uiType: 'checklist', 
+          createdAt: new Date().toISOString(),
           checklistData: {
             title: 'Chuẩn bị cho buổi họp',
             items: [

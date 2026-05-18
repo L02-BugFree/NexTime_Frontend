@@ -8,8 +8,9 @@ export const createRoom = async (payload: CreateRoomRequest): Promise<Room> => {
 };
 
 export const getRooms = async (): Promise<Room[]> => {
-  const response = await axiosClient.get<Room[]>(ROOM_ENDPOINTS.GET);
-  return response.data;
+  const response = await axiosClient.get(ROOM_ENDPOINTS.GET);
+  if (Array.isArray(response.data)) return response.data;
+  return [];
 };
 
 export const getRoomMessages = async (roomId: string): Promise<Message[]> => {

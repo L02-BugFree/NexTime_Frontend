@@ -9,10 +9,11 @@ import {
 } from '../types';
 
 export const getMonthlyCalendar = async (month?: string): Promise<CalendarEvent[]> => {
-  const response = await axiosClient.get<CalendarEvent[]>(SCHEDULE_ENDPOINTS.GET_MONTHLY, {
+  const response = await axiosClient.get(SCHEDULE_ENDPOINTS.GET_MONTHLY, {
     params: month ? { month } : undefined,
   });
-  return response.data;
+  if (Array.isArray(response.data)) return response.data;
+  return [];
 };
 
 export const createWeeklyEvent = async (payload: CreateWeeklyEventRequest): Promise<void> => {

@@ -21,7 +21,7 @@ export const updateVisibility = async (payload: UpdateVisibilityRequest): Promis
 };
 
 export const getQrCode = async (): Promise<{ friendCode: string }> => {
-  const response = await axiosClient.get<{ friendCode: string }>(USER_ENDPOINTS.QR_CODE);
+  const response = await axiosClient.get<{ friendCode: string }>(USER_ENDPOINTS.GET_QR);
   return response.data;
 };
 

@@ -6,14 +6,14 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { ChatStackParamList } from '../../navigation/AppNavigator';
+import { RootStackParamList } from '../../navigation/AppNavigator';
 import { getRooms } from '../../services/roomService';
 import { Room } from '../../types';
 import { colors } from '../../theme/colors';
 import { typography } from '../../theme/typography';
 import { Avatar } from '../../components/ui/Avatar';
 
-type Nav = NativeStackNavigationProp<ChatStackParamList, 'ChatList'>;
+type Nav = NativeStackNavigationProp<RootStackParamList>;
 
 export const ChatListScreen: React.FC = () => {
   const navigation = useNavigation<Nav>();
