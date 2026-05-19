@@ -244,7 +244,7 @@ const s = StyleSheet.create({
   scrollContent: { padding: 24, gap: 20 },
   inputGroup: { gap: 8 },
   label: { ...typography.caption, fontWeight: '700', color: colors.textSecondary },
-  input: { borderHeight: 1, borderWidth: 1.5, borderColor: colors.border, borderRadius: 12, paddingHorizontal: 16, paddingVertical: 12, fontSize: 15, color: colors.text, backgroundColor: '#F8FAFC' },
+  input: { borderWidth: 1.5, borderColor: colors.border, borderRadius: 12, paddingHorizontal: 16, paddingVertical: 12, fontSize: 15, color: colors.text, backgroundColor: '#F8FAFC' },
   textArea: { minHeight: 80, textAlignVertical: 'top' },
   switchGroup: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#F8FAFC', padding: 16, borderRadius: 14, borderWidth: 1, borderColor: colors.border },
   switchLabel: { ...typography.body1, fontWeight: '700', color: colors.text },
