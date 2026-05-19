@@ -29,7 +29,7 @@ export const ChatListScreen: React.FC = () => {
 
   useEffect(() => { loadRooms(); }, []);
 
-  const getFirstName = (name: string) => name.split(' ')[0];
+  const getFirstName = (name?: string) => (name || 'User').split(' ')[0];
 
   return (
     <View style={s.container}>
@@ -47,14 +47,14 @@ export const ChatListScreen: React.FC = () => {
             data={rooms.slice(0, 8)}
             horizontal
             showsHorizontalScrollIndicator={false}
-            keyExtractor={r => r.id}
+            keyExtractor={(r, index) => r.id || String(index)}
             contentContainerStyle={{ paddingHorizontal: 16, paddingVertical: 12, gap: 16 }}
             renderItem={({ item, index }) => (
               <TouchableOpacity
                 style={s.storyItem}
-                onPress={() => navigation.navigate('ChatRoom', { roomId: item.id, roomName: item.name })}
+                onPress={() => navigation.navigate('ChatRoom', { roomId: item.id || '', roomName: item.name || 'Chat' })}
               >
-                <Avatar size={56} name={item.name} style={{ borderWidth: 2, borderColor: colors.primary }} />
+                <Avatar size={56} name={item.name || 'U'} style={{ borderWidth: 2, borderColor: colors.primary }} />
                 <Text style={s.storyName} numberOfLines={1}>{getFirstName(item.name)}</Text>
               </TouchableOpacity>
             )}
@@ -65,19 +65,19 @@ export const ChatListScreen: React.FC = () => {
       {/* Conversations list */}
       <FlatList
         data={rooms}
-        keyExtractor={r => r.id}
+        keyExtractor={(r, index) => r.id || String(index)}
         refreshControl={<RefreshControl refreshing={loading} onRefresh={loadRooms} tintColor={colors.primary} />}
         contentContainerStyle={{ paddingBottom: 24 }}
         renderItem={({ item, index }) => (
           <TouchableOpacity
             style={s.roomItem}
-            onPress={() => navigation.navigate('ChatRoom', { roomId: item.id, roomName: item.name })}
+            onPress={() => navigation.navigate('ChatRoom', { roomId: item.id || '', roomName: item.name || 'Chat' })}
             activeOpacity={0.7}
           >
-            <Avatar size={52} name={item.name} style={{ marginRight: 14 }} />
+            <Avatar size={52} name={item.name || 'U'} style={{ marginRight: 14 }} />
             <View style={s.roomInfo}>
               <View style={s.roomInfoTop}>
-                <Text style={s.roomName} numberOfLines={1}>{item.name}</Text>
+                <Text style={s.roomName} numberOfLines={1}>{item.name || 'Cuộc trò chuyện'}</Text>
                 <Text style={s.roomTime}>vừa xong</Text>
               </View>
               <Text style={s.roomLast} numberOfLines={1}>

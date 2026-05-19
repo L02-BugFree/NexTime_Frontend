@@ -137,9 +137,14 @@ export const ChatRoomScreen: React.FC = () => {
             <Text style={s.hStatus}>Đang hoạt động</Text>
           </View>
         </View>
-        <TouchableOpacity style={s.hBtn}>
-          <Ionicons name="ellipsis-vertical" size={22} color={colors.text} />
-        </TouchableOpacity>
+        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+          <TouchableOpacity style={s.hBtn} onPress={() => navigation.navigate('GroupHeatmap', { roomId, roomName })}>
+            <Ionicons name="calendar-outline" size={22} color={colors.primary} />
+          </TouchableOpacity>
+          <TouchableOpacity style={s.hBtn}>
+            <Ionicons name="ellipsis-vertical" size={22} color={colors.text} />
+          </TouchableOpacity>
+        </View>
       </View>
 
       {/* Messages */}
