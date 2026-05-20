@@ -1,8 +1,7 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
-import { Platform, View } from 'react-native';
-import { colors } from '../theme/colors';
+import { Platform, View, Text, StyleSheet } from 'react-native';
 
 // Import Screens
 import { PersonalCalendarScreen } from '../screens/Calendar/PersonalCalendarScreen';
@@ -24,55 +23,79 @@ export const BottomTabNavigator = () => {
     <Tab.Navigator
       initialRouteName="Chat"
       screenOptions={({ route }) => ({
-        tabBarActiveTintColor: colors.primary,
-        tabBarInactiveTintColor: colors.textSecondary,
-        tabBarStyle: {
-          borderTopWidth: 1,
-          borderTopColor: colors.border,
-          backgroundColor: colors.white,
-          height: Platform.OS === 'ios' ? 84 : 64,
-          paddingBottom: Platform.OS === 'ios' ? 28 : 8,
-          paddingTop: 8,
-          elevation: 8,
-          shadowColor: '#000',
-          shadowOffset: { width: 0, height: -2 },
-          shadowOpacity: 0.06,
-          shadowRadius: 8,
-        },
-        tabBarLabelStyle: {
-          fontSize: 10,
-          fontWeight: '600',
-          marginTop: 2,
-        },
+        tabBarActiveTintColor: '#3B82F6',
+        tabBarInactiveTintColor: '#94A3B8',
+        tabBarStyle: styles.tabBar,
+        tabBarShowLabel: false,
         headerShown: false,
         tabBarIcon: ({ focused, color, size }) => {
           let iconName: keyof typeof Ionicons.glyphMap = 'chatbubbles';
-          if (route.name === 'Chat') iconName = focused ? 'chatbubbles' : 'chatbubbles-outline';
-          else if (route.name === 'Schedule') iconName = focused ? 'calendar' : 'calendar-outline';
-          else if (route.name === 'Events') iconName = focused ? 'checkmark-circle' : 'checkmark-circle-outline';
-          else if (route.name === 'Profile') iconName = focused ? 'person' : 'person-outline';
-          
+          let label = '';
+
+          if (route.name === 'Chat') { iconName = focused ? 'chatbubbles' : 'chatbubbles-outline'; label = 'Chat'; }
+          else if (route.name === 'Schedule') { iconName = focused ? 'calendar' : 'calendar-outline'; label = 'Lịch'; }
+          else if (route.name === 'Events') { iconName = focused ? 'flash' : 'flash-outline'; label = 'Sự kiện'; }
+          else if (route.name === 'Profile') { iconName = focused ? 'person' : 'person-outline'; label = 'Hồ sơ'; }
+
           return (
-            <View style={{
-              alignItems: 'center',
-              justifyContent: 'center',
-              ...(focused ? {
-                backgroundColor: colors.surface,
-                borderRadius: 12,
-                paddingHorizontal: 12,
-                paddingVertical: 4,
-              } : {}),
-            }}>
-              <Ionicons name={iconName} size={22} color={color} />
+            <View style={styles.iconContainer}>
+              <View style={[styles.iconBox, focused && styles.iconBoxActive]}>
+                <Ionicons name={iconName} size={22} color={focused ? '#3B82F6' : '#94A3B8'} />
+              </View>
+              <Text style={[styles.iconLabel, focused && styles.iconLabelActive]}>{label}</Text>
             </View>
           );
         },
       })}
     >
-      <Tab.Screen name="Chat" component={ChatListScreen} options={{ title: 'Chat' }} />
-      <Tab.Screen name="Schedule" component={PersonalCalendarScreen} options={{ title: 'Lịch cá nhân' }} />
-      <Tab.Screen name="Events" component={EventsDashboardScreen} options={{ title: 'Sự kiện' }} />
-      <Tab.Screen name="Profile" component={ProfileScreen} options={{ title: 'Hồ sơ' }} />
+      <Tab.Screen name="Chat" component={ChatListScreen} />
+      <Tab.Screen name="Schedule" component={PersonalCalendarScreen} />
+      <Tab.Screen name="Events" component={EventsDashboardScreen} />
+      <Tab.Screen name="Profile" component={ProfileScreen} />
     </Tab.Navigator>
   );
 };
+
+const styles = StyleSheet.create({
+  tabBar: {
+    position: 'absolute',
+    bottom: Platform.OS === 'ios' ? 24 : 16,
+    left: 20,
+    right: 20,
+    height: 72,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 24,
+    borderTopWidth: 0,
+    elevation: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.1,
+    shadowRadius: 16,
+    paddingHorizontal: 8,
+  },
+  iconContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: Platform.OS === 'ios' ? 24 : 24,
+  },
+  iconBox: {
+    width: 44,
+    height: 32,
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 4,
+  },
+  iconBoxActive: {
+    backgroundColor: '#EFF6FF',
+  },
+  iconLabel: {
+    fontSize: 10,
+    fontWeight: '600',
+    color: '#94A3B8',
+  },
+  iconLabelActive: {
+    color: '#3B82F6',
+    fontWeight: '700',
+  },
+});

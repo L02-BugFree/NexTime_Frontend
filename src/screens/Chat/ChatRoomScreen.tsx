@@ -8,15 +8,12 @@ import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '../../navigation/AppNavigator';
 import { getRoomMessages, sendMessage } from '../../services/roomService';
 import { Message } from '../../types';
-import { colors } from '../../theme/colors';
-import { typography } from '../../theme/typography';
 import { Avatar } from '../../components/ui/Avatar';
 import { PollCard } from '../../components/chat/PollCard';
 import { ChecklistCard } from '../../components/chat/ChecklistCard';
 
 type Route = RouteProp<RootStackParamList, 'ChatRoom'>;
 
-// Bổ sung type mở rộng cho UI demo
 interface ExtendedMessage extends Message {
   uiType?: 'text' | 'poll' | 'checklist';
   pollData?: any;
@@ -38,7 +35,6 @@ export const ChatRoomScreen: React.FC = () => {
       setLoading(true);
       const data = await getRoomMessages(roomId);
       
-      // Inject Mock Data cho Poll và Checklist để xem UI
       const mockMessages: ExtendedMessage[] = [
         { id: 'm1', roomId, senderId: 's1', senderName: 'Quốc Việt', content: 'Tuần sau tụi mình họp nha', isOwn: false, uiType: 'text', createdAt: new Date().toISOString() },
         { id: 'm2', roomId, senderId: 's2', senderName: 'Bạn', content: 'Khi meet vậy ô?', isOwn: true, uiType: 'text', createdAt: new Date().toISOString() },
@@ -91,7 +87,6 @@ export const ChatRoomScreen: React.FC = () => {
   const renderMessage = ({ item }: { item: ExtendedMessage }) => {
     const isMine = item.isOwn ?? false;
     
-    // Render Custom Cards
     let customContent = null;
     if (item.uiType === 'poll' && item.pollData) {
       customContent = <PollCard {...item.pollData} />;
@@ -102,9 +97,9 @@ export const ChatRoomScreen: React.FC = () => {
     return (
       <View style={[s.msgRow, isMine && s.msgRowMine]}>
         {!isMine && (
-          <Avatar size={28} name={item.senderName || 'U'} style={{ marginBottom: 4 }} />
+          <Avatar size={32} name={item.senderName || 'U'} style={{ marginBottom: 4 }} />
         )}
-        <View style={s.msgContentArea}>
+        <View style={[s.msgContentArea, isMine ? { alignItems: 'flex-end' } : { alignItems: 'flex-start' }]}>
           {!isMine && <Text style={s.msgSender}>{item.senderName || 'Người dùng'}</Text>}
           
           {customContent ? (
@@ -127,29 +122,29 @@ export const ChatRoomScreen: React.FC = () => {
     <KeyboardAvoidingView style={s.container} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
       {/* Header */}
       <View style={s.header}>
-        <TouchableOpacity style={s.backBtn} onPress={() => navigation.goBack()}>
-          <Ionicons name="chevron-back" size={24} color={colors.text} />
+        <TouchableOpacity style={s.backBtn} onPress={() => navigation.goBack()} activeOpacity={0.8}>
+          <Ionicons name="chevron-back" size={24} color="#0F172A" />
         </TouchableOpacity>
         <View style={s.headerCenter}>
-          <Avatar size={36} name={roomName} />
+          <Avatar size={40} name={roomName} />
           <View>
             <Text style={s.hName} numberOfLines={1}>{roomName}</Text>
             <Text style={s.hStatus}>Đang hoạt động</Text>
           </View>
         </View>
         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-          <TouchableOpacity style={s.hBtn} onPress={() => navigation.navigate('GroupHeatmap', { roomId, roomName })}>
-            <Ionicons name="calendar-outline" size={22} color={colors.primary} />
+          <TouchableOpacity style={s.hBtn} onPress={() => navigation.navigate('GroupHeatmap', { roomId, roomName })} activeOpacity={0.8}>
+            <Ionicons name="calendar-outline" size={24} color="#3B82F6" />
           </TouchableOpacity>
-          <TouchableOpacity style={s.hBtn}>
-            <Ionicons name="ellipsis-vertical" size={22} color={colors.text} />
+          <TouchableOpacity style={s.hBtn} activeOpacity={0.8}>
+            <Ionicons name="ellipsis-vertical" size={22} color="#0F172A" />
           </TouchableOpacity>
         </View>
       </View>
 
       {/* Messages */}
       {loading ? (
-        <View style={s.center}><ActivityIndicator size="large" color={colors.primary} /></View>
+        <View style={s.center}><ActivityIndicator size="large" color="#3B82F6" /></View>
       ) : (
         <FlatList
           ref={listRef}
@@ -157,9 +152,12 @@ export const ChatRoomScreen: React.FC = () => {
           keyExtractor={(m, i) => m.id || String(i)}
           renderItem={renderMessage}
           contentContainerStyle={s.msgList}
+          showsVerticalScrollIndicator={false}
           ListEmptyComponent={
             <View style={s.empty}>
-              <Ionicons name="chatbubbles-outline" size={48} color={colors.border} />
+              <View style={s.emptyIconBox}>
+                <Ionicons name="chatbubbles-outline" size={40} color="#94A3B8" />
+              </View>
               <Text style={s.emptyTxt}>Hãy bắt đầu cuộc trò chuyện!</Text>
             </View>
           }
@@ -167,59 +165,64 @@ export const ChatRoomScreen: React.FC = () => {
         />
       )}
 
-      {/* Input */}
-      <View style={s.inputBar}>
-        <TouchableOpacity style={s.inputBtn}>
-          <Ionicons name="add-circle-outline" size={26} color={colors.textSecondary} />
-        </TouchableOpacity>
-        <TextInput
-          style={s.input}
-          placeholder="Type message..."
-          placeholderTextColor={colors.textSecondary}
-          value={text}
-          onChangeText={setText}
-          multiline
-          maxLength={1000}
-        />
-        {text.trim() ? (
-          <TouchableOpacity style={s.sendBtn} onPress={handleSend} disabled={sending}>
-            {sending ? <ActivityIndicator size="small" color="#FFF" /> : <Ionicons name="send" size={18} color={colors.white} />}
+      {/* Floating Input Bar */}
+      <View style={s.inputWrapper}>
+        <View style={s.inputBar}>
+          <TouchableOpacity style={s.inputActionBtn} activeOpacity={0.8}>
+            <Ionicons name="add" size={26} color="#64748B" />
           </TouchableOpacity>
-        ) : (
-          <TouchableOpacity style={s.inputBtn}>
-            <Ionicons name="mic-outline" size={24} color={colors.textSecondary} />
-          </TouchableOpacity>
-        )}
+          <TextInput
+            style={s.input}
+            placeholder="Nhắn tin..."
+            placeholderTextColor="#94A3B8"
+            value={text}
+            onChangeText={setText}
+            multiline
+            maxLength={1000}
+          />
+          {text.trim() ? (
+            <TouchableOpacity style={s.sendBtn} onPress={handleSend} disabled={sending} activeOpacity={0.8}>
+              {sending ? <ActivityIndicator size="small" color="#FFFFFF" /> : <Ionicons name="send" size={16} color="#FFFFFF" style={{ marginLeft: 2 }} />}
+            </TouchableOpacity>
+          ) : (
+            <TouchableOpacity style={s.inputActionBtn} activeOpacity={0.8}>
+              <Ionicons name="mic-outline" size={24} color="#64748B" />
+            </TouchableOpacity>
+          )}
+        </View>
       </View>
     </KeyboardAvoidingView>
   );
 };
 
 const s = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.background },
-  header: { flexDirection: 'row', alignItems: 'center', backgroundColor: colors.white, paddingHorizontal: 12, paddingTop: Platform.OS === 'ios' ? 52 : 30, paddingBottom: 12, borderBottomWidth: 1, borderBottomColor: colors.border },
-  backBtn: { width: 40, height: 40, alignItems: 'center', justifyContent: 'center' },
-  headerCenter: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 10 },
-  hName: { ...typography.body1, fontWeight: '700', color: colors.text, maxWidth: 180 },
-  hStatus: { ...typography.caption, color: colors.success, fontWeight: '600' },
-  hBtn: { width: 40, height: 40, alignItems: 'center', justifyContent: 'center' },
+  container: { flex: 1, backgroundColor: '#F8FAFC' },
+  header: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#FFFFFF', paddingHorizontal: 12, paddingTop: Platform.OS === 'ios' ? 52 : 30, paddingBottom: 16, borderBottomWidth: 1, borderBottomColor: '#F1F5F9' },
+  backBtn: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center' },
+  headerCenter: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 12, marginLeft: 4 },
+  hName: { fontSize: 17, fontWeight: '700', color: '#0F172A', maxWidth: 180 },
+  hStatus: { fontSize: 13, color: '#10B981', fontWeight: '600' },
+  hBtn: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center' },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  msgList: { padding: 16, gap: 16, paddingBottom: 8 },
-  msgRow: { flexDirection: 'row', alignItems: 'flex-end', gap: 8 },
+  msgList: { padding: 20, gap: 20, paddingBottom: 24 },
+  msgRow: { flexDirection: 'row', alignItems: 'flex-end', gap: 10 },
   msgRowMine: { justifyContent: 'flex-end' },
-  msgContentArea: { alignItems: 'flex-start', maxWidth: '85%' },
-  msgBubble: { paddingHorizontal: 16, paddingVertical: 12, borderRadius: 20 },
-  msgBubbleOther: { backgroundColor: colors.surfaceHighlight, borderBottomLeftRadius: 4 },
-  msgBubbleMine: { backgroundColor: colors.primary, borderBottomRightRadius: 4 },
-  msgSender: { ...typography.caption, fontWeight: '600', color: colors.textSecondary, marginBottom: 4, marginLeft: 4 },
-  msgText: { ...typography.body1, color: colors.text },
-  msgTextMine: { color: colors.white },
-  msgTime: { ...typography.caption, fontSize: 10, color: colors.textSecondary, marginTop: 4, alignSelf: 'flex-start', marginLeft: 4 },
-  msgTimeMine: { alignSelf: 'flex-end', marginRight: 4 },
-  empty: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 12, paddingTop: 80 },
-  emptyTxt: { ...typography.body2, color: colors.textSecondary, textAlign: 'center' },
-  inputBar: { flexDirection: 'row', alignItems: 'center', backgroundColor: colors.white, paddingHorizontal: 8, paddingVertical: 8, borderTopWidth: 1, borderTopColor: colors.border, gap: 4 },
-  inputBtn: { width: 40, height: 40, alignItems: 'center', justifyContent: 'center' },
-  input: { flex: 1, backgroundColor: colors.surface, borderRadius: 20, paddingHorizontal: 16, paddingVertical: 10, ...typography.body1, color: colors.text, maxHeight: 100 },
-  sendBtn: { width: 40, height: 40, borderRadius: 20, backgroundColor: colors.primary, alignItems: 'center', justifyContent: 'center', marginLeft: 4 },
+  msgContentArea: { maxWidth: '82%' },
+  msgBubble: { paddingHorizontal: 18, paddingVertical: 14, borderRadius: 24 },
+  msgBubbleOther: { backgroundColor: '#FFFFFF', borderBottomLeftRadius: 6, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.03, shadowRadius: 8, elevation: 1 },
+  msgBubbleMine: { backgroundColor: '#3B82F6', borderBottomRightRadius: 6, shadowColor: '#3B82F6', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.2, shadowRadius: 8, elevation: 3 },
+  msgSender: { fontSize: 13, fontWeight: '600', color: '#64748B', marginBottom: 6, marginLeft: 6 },
+  msgText: { fontSize: 15, color: '#0F172A', lineHeight: 22 },
+  msgTextMine: { color: '#FFFFFF' },
+  msgTime: { fontSize: 11, color: '#94A3B8', marginTop: 6, alignSelf: 'flex-start', marginLeft: 6, fontWeight: '500' },
+  msgTimeMine: { alignSelf: 'flex-end', marginRight: 6 },
+  empty: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 16, paddingTop: 100 },
+  emptyIconBox: { width: 80, height: 80, borderRadius: 40, backgroundColor: '#F1F5F9', alignItems: 'center', justifyContent: 'center' },
+  emptyTxt: { fontSize: 15, color: '#64748B', textAlign: 'center', fontWeight: '500' },
+  
+  inputWrapper: { paddingHorizontal: 16, paddingBottom: Platform.OS === 'ios' ? 24 : 16, paddingTop: 8, backgroundColor: '#F8FAFC' },
+  inputBar: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#FFFFFF', paddingHorizontal: 8, paddingVertical: 8, borderRadius: 32, shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.05, shadowRadius: 12, elevation: 4 },
+  inputActionBtn: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center', backgroundColor: '#F8FAFC', borderRadius: 22 },
+  input: { flex: 1, backgroundColor: 'transparent', paddingHorizontal: 16, paddingTop: 12, paddingBottom: 12, fontSize: 15, color: '#0F172A', maxHeight: 100, minHeight: 44 },
+  sendBtn: { width: 44, height: 44, borderRadius: 22, backgroundColor: '#3B82F6', alignItems: 'center', justifyContent: 'center', marginLeft: 4, shadowColor: '#3B82F6', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8, elevation: 4 },
 });

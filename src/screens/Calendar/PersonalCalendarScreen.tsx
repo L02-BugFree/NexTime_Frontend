@@ -75,12 +75,12 @@ export const PersonalCalendarScreen: React.FC = () => {
     return (
       <View style={styles.calendarContainer}>
         <View style={styles.monthHeader}>
-          <TouchableOpacity onPress={() => setCurrentDate(new Date(year, month - 1, 1))}>
-            <Ionicons name="chevron-back" size={24} color={colors.text} />
+          <TouchableOpacity onPress={() => setCurrentDate(new Date(year, month - 1, 1))} style={styles.navBtn}>
+            <Ionicons name="chevron-back" size={20} color="#0F172A" />
           </TouchableOpacity>
           <Text style={styles.monthTitle}>{MONTH_NAMES[month]} {year}</Text>
-          <TouchableOpacity onPress={() => setCurrentDate(new Date(year, month + 1, 1))}>
-            <Ionicons name="chevron-forward" size={24} color={colors.text} />
+          <TouchableOpacity onPress={() => setCurrentDate(new Date(year, month + 1, 1))} style={styles.navBtn}>
+            <Ionicons name="chevron-forward" size={20} color="#0F172A" />
           </TouchableOpacity>
         </View>
 
@@ -101,63 +101,73 @@ export const PersonalCalendarScreen: React.FC = () => {
 
   const renderEvent = ({ item }: { item: CalendarEvent }) => (
     <View style={styles.eventCard}>
-      <View style={[styles.eventColorBar, { backgroundColor: item.colorHex || colors.primary }]} />
+      <View style={[styles.eventColorBar, { backgroundColor: item.colorHex || '#3B82F6' }]} />
       <View style={styles.eventContent}>
         <Text style={styles.eventTitle}>{item.title}</Text>
         <View style={styles.eventTimeRow}>
-          <Ionicons name="time-outline" size={14} color={colors.textSecondary} />
+          <Ionicons name="time-outline" size={14} color="#64748B" />
           <Text style={styles.eventTime}>{item.startTime} - {item.endTime}</Text>
         </View>
       </View>
       <TouchableOpacity style={styles.moreButton}>
-        <Ionicons name="ellipsis-vertical" size={20} color={colors.textSecondary} />
+        <Ionicons name="ellipsis-vertical" size={20} color="#94A3B8" />
       </TouchableOpacity>
     </View>
   );
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Lịch cá nhân</Text>
-        <TouchableOpacity style={styles.addButton} onPress={() => setModalVisible(true)}>
-          <Ionicons name="add" size={24} color={colors.white} />
-        </TouchableOpacity>
-      </View>
-
-      {renderCalendar()}
-
-      <View style={styles.eventsListContainer}>
-        <Text style={styles.sectionTitle}>Lịch trình ngày {selectedDate.split('-').reverse().join('/')}</Text>
-        {loading ? (
-          <View style={styles.loadingContainer}>
-            <ActivityIndicator size="small" color={colors.primary} />
+      <View style={styles.container}>
+        <View style={styles.header}>
+          <View>
+            <Text style={styles.headerTitle}>Lịch của tôi</Text>
+            <Text style={styles.headerSubtitle}>Quản lý lịch trình cá nhân</Text>
           </View>
-        ) : (
-          <FlatList
-            data={selectedEvents}
-            keyExtractor={item => item.id || Math.random().toString()}
-            renderItem={renderEvent}
-            contentContainerStyle={styles.listContent}
-            showsVerticalScrollIndicator={false}
-            ListEmptyComponent={
-              <View style={styles.emptyContainer}>
-                <Ionicons name="calendar-clear-outline" size={48} color={colors.border} />
-                <Text style={styles.emptyText}>Không có sự kiện nào trong ngày này</Text>
-                <TouchableOpacity style={styles.emptyAddButton} onPress={() => setModalVisible(true)}>
-                  <Text style={styles.emptyAddButtonText}>Tạo sự kiện mới</Text>
-                </TouchableOpacity>
-              </View>
-            }
-          />
-        )}
+          <TouchableOpacity style={styles.searchBtn} activeOpacity={0.8}>
+            <Ionicons name="search-outline" size={24} color="#0F172A" />
+          </TouchableOpacity>
+        </View>
+
+        {renderCalendar()}
+
+        <View style={styles.eventsListContainer}>
+          <Text style={styles.sectionTitle}>Lịch trình ngày {selectedDate.split('-').reverse().join('/')}</Text>
+          {loading ? (
+            <View style={styles.loadingContainer}>
+              <ActivityIndicator size="large" color="#3B82F6" />
+            </View>
+          ) : (
+            <FlatList
+              data={selectedEvents}
+              keyExtractor={item => item.id || Math.random().toString()}
+              renderItem={renderEvent}
+              contentContainerStyle={styles.listContent}
+              showsVerticalScrollIndicator={false}
+              ListEmptyComponent={
+                <View style={styles.emptyContainer}>
+                  <View style={styles.emptyIconBox}>
+                    <Ionicons name="calendar-clear-outline" size={36} color="#94A3B8" />
+                  </View>
+                  <Text style={styles.emptyTitle}>Không có sự kiện</Text>
+                  <Text style={styles.emptyText}>Bạn không có lịch trình nào vào ngày này.</Text>
+                  <TouchableOpacity style={styles.emptyAddButton} onPress={() => setModalVisible(true)}>
+                    <Text style={styles.emptyAddButtonText}>Tạo sự kiện mới</Text>
+                  </TouchableOpacity>
+                </View>
+              }
+            />
+          )}
+        </View>
+
+        <TouchableOpacity style={styles.fab} onPress={() => setModalVisible(true)} activeOpacity={0.85}>
+          <Ionicons name="add" size={28} color="#FFFFFF" />
+        </TouchableOpacity>
       </View>
 
       <CreateEventModal
         visible={modalVisible}
         onClose={() => setModalVisible(false)}
-        onSuccess={() => {
-          loadEvents();
-        }}
+        onSuccess={loadEvents}
         defaultDate={selectedDate}
       />
     </SafeAreaView>
@@ -165,36 +175,46 @@ export const PersonalCalendarScreen: React.FC = () => {
 };
 
 const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: colors.background, paddingTop: Platform.OS === 'android' ? 24 : 0 },
-  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, paddingTop: 16, paddingBottom: 16, backgroundColor: colors.white },
-  headerTitle: { ...typography.h1, fontSize: 24, color: colors.text },
-  addButton: { width: 40, height: 40, borderRadius: 20, backgroundColor: colors.primary, alignItems: 'center', justifyContent: 'center', shadowColor: colors.primary, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8, elevation: 4 },
-  calendarContainer: { backgroundColor: colors.white, paddingBottom: 16, paddingHorizontal: 16, borderBottomLeftRadius: 24, borderBottomRightRadius: 24, shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.05, shadowRadius: 12, elevation: 3, marginBottom: 16 },
+  safeArea: { flex: 1, backgroundColor: '#F8FAFC', paddingTop: Platform.OS === 'android' ? 24 : 0 },
+  container: { flex: 1 },
+  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 24, paddingTop: 16, paddingBottom: 16, backgroundColor: '#F8FAFC' },
+  headerTitle: { fontSize: 26, fontWeight: '800', color: '#0F172A', letterSpacing: -0.5 },
+  headerSubtitle: { fontSize: 14, color: '#64748B', marginTop: 2, fontWeight: '500' },
+  searchBtn: { width: 44, height: 44, borderRadius: 22, backgroundColor: '#FFFFFF', alignItems: 'center', justifyContent: 'center', shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 8, elevation: 2 },
+  
+  calendarContainer: { backgroundColor: '#FFFFFF', marginHorizontal: 20, paddingBottom: 16, paddingHorizontal: 16, borderRadius: 24, shadowColor: '#000', shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.05, shadowRadius: 16, elevation: 4, marginBottom: 24 },
   monthHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 16 },
-  monthTitle: { ...typography.h2, fontSize: 18, color: colors.text },
-  weekDaysRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8 },
-  weekDayText: { flex: 1, textAlign: 'center', ...typography.caption, color: colors.textSecondary, fontWeight: '600' },
+  monthTitle: { fontSize: 18, fontWeight: '700', color: '#0F172A' },
+  navBtn: { padding: 8, backgroundColor: '#F1F5F9', borderRadius: 12 },
+  weekDaysRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 12 },
+  weekDayText: { flex: 1, textAlign: 'center', fontSize: 13, color: '#64748B', fontWeight: '700' },
   daysGrid: { flexDirection: 'row', flexWrap: 'wrap' },
   dayCell: { width: '14.28%', aspectRatio: 1, alignItems: 'center', justifyContent: 'center', position: 'relative' },
-  selectedDayCell: { backgroundColor: colors.primary, borderRadius: 20 },
-  dayText: { ...typography.body1, color: colors.text, fontWeight: '500' },
-  selectedDayText: { color: colors.white, fontWeight: '700' },
-  todayText: { color: colors.primary, fontWeight: '700' },
-  eventDot: { width: 4, height: 4, borderRadius: 2, backgroundColor: colors.primary, position: 'absolute', bottom: 4 },
-  selectedEventDot: { backgroundColor: colors.white },
-  eventsListContainer: { flex: 1, paddingHorizontal: 20 },
-  sectionTitle: { ...typography.h3, color: colors.text, marginBottom: 16 },
-  listContent: { paddingBottom: 40, gap: 12 },
-  eventCard: { flexDirection: 'row', backgroundColor: colors.white, borderRadius: 16, overflow: 'hidden', elevation: 2, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 8 },
+  selectedDayCell: { backgroundColor: '#3B82F6', borderRadius: 14 },
+  dayText: { fontSize: 15, color: '#374151', fontWeight: '500' },
+  selectedDayText: { color: '#FFFFFF', fontWeight: '700' },
+  todayText: { color: '#3B82F6', fontWeight: '700' },
+  eventDot: { width: 4, height: 4, borderRadius: 2, backgroundColor: '#3B82F6', position: 'absolute', bottom: 6 },
+  selectedEventDot: { backgroundColor: '#FFFFFF' },
+  
+  eventsListContainer: { flex: 1, paddingHorizontal: 24 },
+  sectionTitle: { fontSize: 18, fontWeight: '700', color: '#0F172A', marginBottom: 16 },
+  listContent: { paddingBottom: 100, gap: 12 },
+  eventCard: { flexDirection: 'row', backgroundColor: '#FFFFFF', borderRadius: 16, overflow: 'hidden', elevation: 2, shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.04, shadowRadius: 12 },
   eventColorBar: { width: 6 },
   eventContent: { flex: 1, padding: 16 },
-  eventTitle: { ...typography.body1, fontWeight: '700', color: colors.text, marginBottom: 8 },
+  eventTitle: { fontSize: 16, fontWeight: '700', color: '#0F172A', marginBottom: 6 },
   eventTimeRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  eventTime: { ...typography.caption, color: colors.textSecondary },
+  eventTime: { fontSize: 13, color: '#64748B', fontWeight: '500' },
   moreButton: { padding: 16, justifyContent: 'center' },
+  
   loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  emptyContainer: { alignItems: 'center', justifyContent: 'center', paddingVertical: 40, gap: 12 },
-  emptyText: { ...typography.body2, color: colors.textSecondary },
-  emptyAddButton: { marginTop: 12, paddingHorizontal: 20, paddingVertical: 10, backgroundColor: colors.surfaceHighlight, borderRadius: 20 },
-  emptyAddButtonText: { color: colors.primary, fontWeight: '600', fontSize: 14 },
+  emptyContainer: { alignItems: 'center', justifyContent: 'center', paddingVertical: 48 },
+  emptyIconBox: { width: 72, height: 72, borderRadius: 36, backgroundColor: '#F1F5F9', alignItems: 'center', justifyContent: 'center', marginBottom: 16 },
+  emptyTitle: { fontSize: 18, fontWeight: '700', color: '#0F172A', marginBottom: 8 },
+  emptyText: { fontSize: 14, color: '#64748B', textAlign: 'center', paddingHorizontal: 20 },
+  emptyAddButton: { marginTop: 24, paddingHorizontal: 24, paddingVertical: 14, backgroundColor: '#EFF6FF', borderRadius: 14 },
+  emptyAddButtonText: { color: '#3B82F6', fontWeight: '700', fontSize: 15 },
+  
+  fab: { position: 'absolute', bottom: Platform.OS === 'ios' ? 100 : 90, right: 20, width: 60, height: 60, borderRadius: 30, backgroundColor: '#3B82F6', alignItems: 'center', justifyContent: 'center', shadowColor: '#3B82F6', shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.35, shadowRadius: 12, elevation: 8 },
 });

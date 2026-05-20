@@ -5,7 +5,7 @@ import { colors } from '../../theme/colors';
 import { typography } from '../../theme/typography';
 import { createOneshotEvent, createWeeklyEvent } from '../../services/scheduleService';
 
-const PRESET_COLORS = ['#0066FF', '#8B5CF6', '#10B981', '#F59E0B', '#EF4444', '#EC4899'];
+const PRESET_COLORS = ['#3B82F6', '#8B5CF6', '#10B981', '#F59E0B', '#EF4444', '#EC4899'];
 const DAYS_OF_WEEK = [
   { label: 'T2', value: 1 },
   { label: 'T3', value: 2 },
@@ -71,7 +71,7 @@ export const CreateEventModal: React.FC<CreateEventModalProps> = ({
         });
       }
       
-      Alert.alert('Thành công', 'Đã thêm lịch trình mới thành công!');
+      Alert.alert('Thành công', 'Đã thêm sự kiện thành công!');
       onSuccess();
       handleClose();
     } catch (e: any) {
@@ -93,11 +93,16 @@ export const CreateEventModal: React.FC<CreateEventModalProps> = ({
     <Modal visible={visible} animationType="slide" transparent>
       <View style={s.overlay}>
         <View style={s.modalContainer}>
+          {/* Handle */}
+          <View style={s.dragHandleContainer}>
+            <View style={s.dragHandle} />
+          </View>
+
           {/* Header */}
           <View style={s.header}>
-            <Text style={s.headerTitle}>Thêm lịch trình mới</Text>
+            <Text style={s.headerTitle}>Thêm sự kiện mới</Text>
             <TouchableOpacity onPress={handleClose} style={s.closeBtn}>
-              <Ionicons name="close" size={24} color={colors.text} />
+              <Ionicons name="close-circle" size={26} color="#94A3B8" />
             </TouchableOpacity>
           </View>
 
@@ -105,40 +110,46 @@ export const CreateEventModal: React.FC<CreateEventModalProps> = ({
             {/* Title */}
             <View style={s.inputGroup}>
               <Text style={s.label}>Tiêu đề sự kiện</Text>
-              <TextInput
-                style={s.input}
-                placeholder="Ví dụ: Họp nhóm dự án"
-                placeholderTextColor={colors.textSecondary}
-                value={title}
-                onChangeText={setTitle}
-              />
+              <View style={s.inputBox}>
+                <Ionicons name="text-outline" size={20} color="#64748B" style={s.inputIcon} />
+                <TextInput
+                  style={s.input}
+                  placeholder="Ví dụ: Họp nhóm dự án"
+                  placeholderTextColor="#94A3B8"
+                  value={title}
+                  onChangeText={setTitle}
+                />
+              </View>
             </View>
 
             {/* Description */}
             <View style={s.inputGroup}>
               <Text style={s.label}>Mô tả (Không bắt buộc)</Text>
-              <TextInput
-                style={[s.input, s.textArea]}
-                placeholder="Nhập chi tiết về buổi họp, địa điểm..."
-                placeholderTextColor={colors.textSecondary}
-                value={desc}
-                onChangeText={setDesc}
-                multiline
-                numberOfLines={3}
-              />
+              <View style={[s.inputBox, s.textAreaBox]}>
+                <Ionicons name="document-text-outline" size={20} color="#64748B" style={[s.inputIcon, { marginTop: 12 }]} />
+                <TextInput
+                  style={[s.input, s.textArea]}
+                  placeholder="Nhập chi tiết về buổi họp, địa điểm..."
+                  placeholderTextColor="#94A3B8"
+                  value={desc}
+                  onChangeText={setDesc}
+                  multiline
+                  numberOfLines={3}
+                />
+              </View>
             </View>
 
             {/* Toggle Is Weekly */}
             <View style={s.switchGroup}>
-              <View>
+              <View style={s.switchTextCol}>
                 <Text style={s.switchLabel}>Lặp lại hàng tuần</Text>
                 <Text style={s.switchSub}>Lịch cố định lặp lại mỗi tuần</Text>
               </View>
               <Switch
                 value={isWeekly}
                 onValueChange={setIsWeekly}
-                trackColor={{ false: colors.border, true: colors.primary }}
-                thumbColor={Platform.OS === 'ios' ? undefined : colors.white}
+                trackColor={{ false: '#E2E8F0', true: '#3B82F6' }}
+                thumbColor={Platform.OS === 'ios' ? undefined : '#FFFFFF'}
               />
             </View>
 
@@ -165,14 +176,17 @@ export const CreateEventModal: React.FC<CreateEventModalProps> = ({
               </View>
             ) : (
               <View style={s.inputGroup}>
-                <Text style={s.label}>Ngày diễn ra (YYYY-MM-DD)</Text>
-                <TextInput
-                  style={s.input}
-                  placeholder="YYYY-MM-DD"
-                  placeholderTextColor={colors.textSecondary}
-                  value={date}
-                  onChangeText={setDate}
-                />
+                <Text style={s.label}>Ngày diễn ra</Text>
+                <View style={s.inputBox}>
+                  <Ionicons name="calendar-outline" size={20} color="#64748B" style={s.inputIcon} />
+                  <TextInput
+                    style={s.input}
+                    placeholder="YYYY-MM-DD"
+                    placeholderTextColor="#94A3B8"
+                    value={date}
+                    onChangeText={setDate}
+                  />
+                </View>
               </View>
             )}
 
@@ -180,23 +194,29 @@ export const CreateEventModal: React.FC<CreateEventModalProps> = ({
             <View style={s.timeRow}>
               <View style={[s.inputGroup, { flex: 1 }]}>
                 <Text style={s.label}>Giờ bắt đầu</Text>
-                <TextInput
-                  style={s.input}
-                  placeholder="Giờ bắt đầu (09:00)"
-                  placeholderTextColor={colors.textSecondary}
-                  value={startTime}
-                  onChangeText={setStartTime}
-                />
+                <View style={s.inputBox}>
+                  <Ionicons name="time-outline" size={20} color="#64748B" style={s.inputIcon} />
+                  <TextInput
+                    style={s.input}
+                    placeholder="09:00"
+                    placeholderTextColor="#94A3B8"
+                    value={startTime}
+                    onChangeText={setStartTime}
+                  />
+                </View>
               </View>
               <View style={[s.inputGroup, { flex: 1 }]}>
                 <Text style={s.label}>Giờ kết thúc</Text>
-                <TextInput
-                  style={s.input}
-                  placeholder="Giờ kết thúc (10:00)"
-                  placeholderTextColor={colors.textSecondary}
-                  value={endTime}
-                  onChangeText={setEndTime}
-                />
+                <View style={s.inputBox}>
+                  <Ionicons name="time-outline" size={20} color="#64748B" style={s.inputIcon} />
+                  <TextInput
+                    style={s.input}
+                    placeholder="10:00"
+                    placeholderTextColor="#94A3B8"
+                    value={endTime}
+                    onChangeText={setEndTime}
+                  />
+                </View>
               </View>
             </View>
 
@@ -212,7 +232,7 @@ export const CreateEventModal: React.FC<CreateEventModalProps> = ({
                       style={[s.colorCircle, { backgroundColor: c }, isSelected && s.selectedColorCircle]}
                       onPress={() => setColorHex(c)}
                     >
-                      {isSelected && <Ionicons name="checkmark" size={16} color={colors.white} />}
+                      {isSelected && <Ionicons name="checkmark" size={18} color="#FFFFFF" />}
                     </TouchableOpacity>
                   );
                 })}
@@ -220,11 +240,11 @@ export const CreateEventModal: React.FC<CreateEventModalProps> = ({
             </View>
 
             {/* Submit Button */}
-            <TouchableOpacity style={s.submitBtn} onPress={handleSave} disabled={loading}>
+            <TouchableOpacity style={s.submitBtn} onPress={handleSave} disabled={loading} activeOpacity={0.85}>
               {loading ? (
-                <ActivityIndicator color={colors.white} />
+                <ActivityIndicator color="#FFFFFF" />
               ) : (
-                <Text style={s.submitBtnText}>Xác nhận & Thêm</Text>
+                <Text style={s.submitBtnText}>Thêm sự kiện</Text>
               )}
             </TouchableOpacity>
           </ScrollView>
@@ -235,29 +255,35 @@ export const CreateEventModal: React.FC<CreateEventModalProps> = ({
 };
 
 const s = StyleSheet.create({
-  overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'flex-end' },
-  modalContainer: { backgroundColor: colors.white, borderTopLeftRadius: 28, borderTopRightRadius: 28, height: '85%', overflow: 'hidden' },
-  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 24, paddingVertical: 18, borderBottomWidth: 1, borderBottomColor: colors.border },
-  headerTitle: { ...typography.h2, fontSize: 18, color: colors.text },
+  overlay: { flex: 1, backgroundColor: 'rgba(15, 23, 42, 0.6)', justifyContent: 'flex-end' },
+  modalContainer: { backgroundColor: '#FFFFFF', borderTopLeftRadius: 32, borderTopRightRadius: 32, height: '88%', overflow: 'hidden', shadowColor: '#000', shadowOffset: { width: 0, height: -10 }, shadowOpacity: 0.15, shadowRadius: 20 },
+  dragHandleContainer: { width: '100%', alignItems: 'center', paddingTop: 12, paddingBottom: 4 },
+  dragHandle: { width: 40, height: 5, backgroundColor: '#E2E8F0', borderRadius: 3 },
+  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 24, paddingVertical: 12 },
+  headerTitle: { fontSize: 22, fontWeight: '800', color: '#0F172A' },
   closeBtn: { padding: 4 },
   form: { flex: 1 },
-  scrollContent: { padding: 24, gap: 20 },
+  scrollContent: { paddingHorizontal: 24, paddingBottom: 40, paddingTop: 12, gap: 20 },
   inputGroup: { gap: 8 },
-  label: { ...typography.caption, fontWeight: '700', color: colors.textSecondary },
-  input: { borderWidth: 1.5, borderColor: colors.border, borderRadius: 12, paddingHorizontal: 16, paddingVertical: 12, fontSize: 15, color: colors.text, backgroundColor: '#F8FAFC' },
+  label: { fontSize: 14, fontWeight: '700', color: '#374151' },
+  inputBox: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#F8FAFC', borderWidth: 1, borderColor: '#E2E8F0', borderRadius: 16, paddingHorizontal: 16, paddingVertical: 4 },
+  textAreaBox: { alignItems: 'flex-start' },
+  inputIcon: { marginRight: 10 },
+  input: { flex: 1, fontSize: 15, color: '#0F172A', paddingVertical: 12 },
   textArea: { minHeight: 80, textAlignVertical: 'top' },
-  switchGroup: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#F8FAFC', padding: 16, borderRadius: 14, borderWidth: 1, borderColor: colors.border },
-  switchLabel: { ...typography.body1, fontWeight: '700', color: colors.text },
-  switchSub: { ...typography.caption, color: colors.textSecondary },
+  switchGroup: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#F8FAFC', padding: 16, borderRadius: 16, borderWidth: 1, borderColor: '#E2E8F0' },
+  switchTextCol: { flex: 1 },
+  switchLabel: { fontSize: 16, fontWeight: '700', color: '#0F172A' },
+  switchSub: { fontSize: 13, color: '#64748B', marginTop: 2 },
   daysRow: { flexDirection: 'row', justifyContent: 'space-between' },
-  dayBtn: { width: 40, height: 40, borderRadius: 20, backgroundColor: '#F1F5F9', alignItems: 'center', justifyContent: 'center' },
-  selectedDayBtn: { backgroundColor: colors.primary },
-  dayBtnText: { fontSize: 14, fontWeight: '600', color: colors.text },
-  selectedDayBtnText: { color: colors.white },
+  dayBtn: { width: 42, height: 42, borderRadius: 21, backgroundColor: '#F1F5F9', alignItems: 'center', justifyContent: 'center' },
+  selectedDayBtn: { backgroundColor: '#3B82F6', shadowColor: '#3B82F6', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8 },
+  dayBtnText: { fontSize: 14, fontWeight: '700', color: '#64748B' },
+  selectedDayBtnText: { color: '#FFFFFF' },
   timeRow: { flexDirection: 'row', gap: 16 },
   colorsRow: { flexDirection: 'row', gap: 16 },
-  colorCircle: { width: 36, height: 36, borderRadius: 18, alignItems: 'center', justifyContent: 'center' },
+  colorCircle: { width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center' },
   selectedColorCircle: { borderWidth: 3, borderColor: '#E2E8F0' },
-  submitBtn: { backgroundColor: colors.primary, borderRadius: 14, paddingVertical: 16, alignItems: 'center', justifyContent: 'center', marginTop: 12, shadowColor: colors.primary, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8, elevation: 4 },
-  submitBtnText: { fontSize: 16, fontWeight: '700', color: colors.white },
+  submitBtn: { backgroundColor: '#3B82F6', borderRadius: 16, paddingVertical: 18, alignItems: 'center', justifyContent: 'center', marginTop: 12, shadowColor: '#3B82F6', shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.3, shadowRadius: 12, elevation: 6 },
+  submitBtnText: { fontSize: 16, fontWeight: '700', color: '#FFFFFF' },
 });

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, SafeAreaView, Platform, ActivityIndicator, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, SafeAreaView, Platform, ActivityIndicator, TouchableOpacity, ScrollView } from 'react-native';
 import { WeeklyGrid } from '../../components/calendar/WeeklyGrid';
 import { colors } from '../../theme/colors';
 import { typography } from '../../theme/typography';
@@ -7,12 +7,10 @@ import { getGroupHeatmap } from '../../services/groupService';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '../../navigation/AppNavigator';
 import { Ionicons } from '@expo/vector-icons';
-
 import { CreateEventModal } from '../../components/calendar/CreateEventModal';
 
 type Route = RouteProp<RootStackParamList, 'GroupHeatmap'>;
 
-// Fallback logic in case API is empty or failing
 const generateMockHeatmapData = () => {
   const data: any = {};
   for (let day = 0; day < 7; day++) {
@@ -29,13 +27,12 @@ const generateMockHeatmapData = () => {
 export const GroupHeatmapScreen = () => {
   const route = useRoute<Route>();
   const navigation = useNavigation<any>();
-  // params might be undefined if opened somehow else, but it shouldn't be based on AppNavigator.
   const { roomId, roomName } = route.params || { roomId: 'group_123', roomName: 'Nhóm Phát Triển Mobile App' };
 
   const [heatmapData, setHeatmapData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [modalVisible, setModalVisible] = useState(false);
-  const TOTAL_MEMBERS = 10; // Hardcoded cho demo, thực tế lấy từ chi tiết Group
+  const TOTAL_MEMBERS = 10;
 
   const fetchHeatmap = async () => {
     try {
@@ -54,9 +51,7 @@ export const GroupHeatmapScreen = () => {
     }
   };
 
-  useEffect(() => {
-    fetchHeatmap();
-  }, []);
+  useEffect(() => { fetchHeatmap(); }, []);
 
   const handleCellPress = (day: number, hour: number) => {
     const busy = heatmapData[day]?.[hour]?.busyCount || 0;
@@ -66,150 +61,105 @@ export const GroupHeatmapScreen = () => {
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>
+        {/* Header */}
         <View style={styles.header}>
-          <View style={styles.headerTop}>
-            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-              <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
-                <Ionicons name="chevron-back" size={24} color={colors.text} />
-              </TouchableOpacity>
-              <View>
-                <Text style={styles.headerTitle}>Lịch rảnh chung</Text>
-                <Text style={styles.headerSubtitle}>
-                  {roomName} ({TOTAL_MEMBERS} tv)
-                </Text>
+          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
+            <Ionicons name="chevron-back" size={24} color="#0F172A" />
+          </TouchableOpacity>
+          <View style={styles.headerTextContainer}>
+            <Text style={styles.headerTitle}>Lịch rảnh chung</Text>
+            <Text style={styles.headerSubtitle} numberOfLines={1}>
+              {roomName} ({TOTAL_MEMBERS} tv)
+            </Text>
+          </View>
+          <TouchableOpacity style={styles.addBtn} onPress={() => setModalVisible(true)} activeOpacity={0.8}>
+            <Ionicons name="add" size={20} color="#FFFFFF" style={{ marginRight: 4 }} />
+            <Text style={styles.addBtnText}>Lịch rảnh</Text>
+          </TouchableOpacity>
+        </View>
+
+        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
+          {/* Legend */}
+          <View style={styles.legendWrapper}>
+            <View style={styles.legendContainer}>
+              <View style={styles.legendItem}>
+                <View style={[styles.legendBox, { backgroundColor: '#F1F5F9' }]} />
+                <Text style={styles.legendText}>Rảnh</Text>
+              </View>
+              <View style={styles.legendItem}>
+                <View style={[styles.legendBox, { backgroundColor: '#BAE6FD' }]} />
+                <Text style={styles.legendText}>Ít bận</Text>
+              </View>
+              <View style={styles.legendItem}>
+                <View style={[styles.legendBox, { backgroundColor: '#3B82F6' }]} />
+                <Text style={styles.legendText}>Bận nhiều</Text>
               </View>
             </View>
-            <TouchableOpacity style={styles.addBtn} onPress={() => setModalVisible(true)}>
-              <Ionicons name="add" size={20} color={colors.white} style={{ marginRight: 4 }} />
-              <Text style={styles.addBtnText}>Lịch rảnh</Text>
-            </TouchableOpacity>
           </View>
-        </View>
 
-        {/* Chú giải (Legend) */}
-        <View style={styles.legendContainer}>
-          <View style={styles.legendItem}>
-            <View style={[styles.legendBox, { backgroundColor: '#F1F5F9' }]} />
-            <Text style={styles.legendText}>Rảnh</Text>
+          {/* Grid */}
+          <View style={styles.gridWrapper}>
+            {loading ? (
+              <View style={styles.loadingContainer}>
+                <ActivityIndicator size="large" color="#3B82F6" />
+                <Text style={styles.loadingText}>Đang tổng hợp lịch nhóm...</Text>
+              </View>
+            ) : (
+              <View style={styles.gridCard}>
+                <WeeklyGrid 
+                  data={heatmapData} 
+                  totalMembers={TOTAL_MEMBERS} 
+                  onCellPress={handleCellPress} 
+                />
+              </View>
+            )}
           </View>
-          <View style={styles.legendItem}>
-            <View style={[styles.legendBox, { backgroundColor: '#BAE6FD' }]} />
-            <Text style={styles.legendText}>Ít bận</Text>
-          </View>
-          <View style={styles.legendItem}>
-            <View style={[styles.legendBox, { backgroundColor: colors.primary }]} />
-            <Text style={styles.legendText}>Bận nhiều</Text>
-          </View>
-        </View>
-
-        {/* Heatmap Grid */}
-        <View style={styles.gridWrapper}>
-          {loading ? (
-             <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-               <ActivityIndicator size="large" color={colors.primary} />
-             </View>
-          ) : (
-            <WeeklyGrid 
-              data={heatmapData} 
-              totalMembers={TOTAL_MEMBERS} 
-              onCellPress={handleCellPress} 
-            />
-          )}
-        </View>
+        </ScrollView>
       </View>
 
       <CreateEventModal
         visible={modalVisible}
         onClose={() => setModalVisible(false)}
-        onSuccess={() => {
-          fetchHeatmap();
-        }}
+        onSuccess={fetchHeatmap}
       />
     </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: colors.background,
-    paddingTop: Platform.OS === 'android' ? 24 : 0,
-  },
-  container: {
-    flex: 1,
-  },
+  safeArea: { flex: 1, backgroundColor: '#F8FAFC', paddingTop: Platform.OS === 'android' ? 24 : 0 },
+  container: { flex: 1 },
   header: {
-    backgroundColor: colors.white,
-    paddingHorizontal: 20,
-    paddingTop: 16,
-    paddingBottom: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#F1F5F9',
+    flexDirection: 'row', alignItems: 'center', backgroundColor: '#F8FAFC',
+    paddingHorizontal: 20, paddingTop: 16, paddingBottom: 20,
   },
-  headerTop: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  backBtn: {
-    marginRight: 12,
-    padding: 4,
-  },
-  headerTitle: {
-    ...typography.h2,
-    fontSize: 18,
-    color: colors.text,
-  },
-  headerSubtitle: {
-    ...typography.caption,
-    color: colors.textSecondary,
-    marginTop: 2,
-  },
+  backBtn: { width: 40, height: 40, borderRadius: 20, backgroundColor: '#FFFFFF', alignItems: 'center', justifyContent: 'center', shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 8, elevation: 2 },
+  headerTextContainer: { flex: 1, marginLeft: 16, marginRight: 12 },
+  headerTitle: { fontSize: 22, fontWeight: '800', color: '#0F172A' },
+  headerSubtitle: { fontSize: 13, color: '#64748B', marginTop: 2, fontWeight: '500' },
   addBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: colors.primary,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 20,
-    shadowColor: colors.primary,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 6,
-    elevation: 3,
+    flexDirection: 'row', alignItems: 'center', backgroundColor: '#3B82F6',
+    paddingHorizontal: 16, paddingVertical: 10, borderRadius: 20,
+    shadowColor: '#3B82F6', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8, elevation: 4,
   },
-  addBtnText: {
-    color: colors.white,
-    fontSize: 12,
-    fontWeight: '700',
-  },
+  addBtnText: { color: '#FFFFFF', fontSize: 13, fontWeight: '700' },
+  
+  scrollContent: { paddingBottom: 40 },
+  legendWrapper: { paddingHorizontal: 20, marginBottom: 16 },
   legendContainer: {
-    flexDirection: 'row',
-    justifyContent: 'flex-start',
-    backgroundColor: colors.white,
-    paddingHorizontal: 20,
-    paddingVertical: 12,
-    gap: 16,
-    marginBottom: 8,
+    flexDirection: 'row', justifyContent: 'space-around', backgroundColor: '#FFFFFF',
+    paddingVertical: 16, borderRadius: 16,
+    shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.04, shadowRadius: 12, elevation: 2,
   },
-  legendItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
+  legendItem: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  legendBox: { width: 14, height: 14, borderRadius: 4 },
+  legendText: { fontSize: 13, color: '#64748B', fontWeight: '600' },
+  
+  gridWrapper: { paddingHorizontal: 20 },
+  gridCard: {
+    backgroundColor: '#FFFFFF', borderRadius: 24, padding: 16,
+    shadowColor: '#000', shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.04, shadowRadius: 16, elevation: 4,
   },
-  legendBox: {
-    width: 12,
-    height: 12,
-    borderRadius: 3,
-  },
-  legendText: {
-    fontSize: 11,
-    color: colors.textSecondary,
-    fontWeight: '600',
-  },
-  gridWrapper: {
-    flex: 1,
-    paddingHorizontal: 12,
-    paddingBottom: 12,
-  },
+  loadingContainer: { alignItems: 'center', justifyContent: 'center', paddingVertical: 60, backgroundColor: '#FFFFFF', borderRadius: 24, marginHorizontal: 20 },
+  loadingText: { marginTop: 16, fontSize: 14, color: '#64748B', fontWeight: '500' },
 });
