@@ -9,6 +9,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../navigation/AppNavigator';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+import { register } from '../../services/authService';
 
 type Nav = NativeStackNavigationProp<RootStackParamList>;
 
@@ -35,12 +36,23 @@ export const RegisterScreen: React.FC = () => {
       return;
     }
     
-    // Mock registration process
     setIsLoading(true);
-    setTimeout(() => {
-      setIsLoading(false);
+    try {
+      // Auto-generate friendCode if it's missing in the UI
+      const autoFriendCode = `ID${Math.floor(Math.random() * 1000000)}`;
+      await register({
+        email: email.trim(),
+        password: password.trim(),
+        displayName: name.trim(),
+        friendCode: autoFriendCode
+      });
       navigation.reset({ index: 0, routes: [{ name: 'Main' }] });
-    }, 1500);
+    } catch (err: any) {
+      setErrorMsg(err?.response?.data?.message || 'Đăng ký thất bại. Vui lòng thử lại.');
+      setErrorModal(true);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (

@@ -7,6 +7,14 @@ export const createPoll = async (payload: CreatePollRequest): Promise<Poll> => {
   return response.data;
 };
 
+export const getPolls = async (): Promise<Poll[]> => {
+  const response = await axiosClient.get(POLL_ENDPOINTS.GET_ALL);
+  if (Array.isArray(response.data)) {
+    return response.data;
+  }
+  return [];
+};
+
 export const votePoll = async (pollId: string, payload: VoteRequest): Promise<any> => {
   const response = await axiosClient.post<any>(POLL_ENDPOINTS.VOTE(pollId), payload);
   return response.data;

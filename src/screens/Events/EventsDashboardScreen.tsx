@@ -5,45 +5,35 @@ import { colors } from '../../theme/colors';
 import { typography } from '../../theme/typography';
 import { PollCard } from '../../components/chat/PollCard';
 import { ChecklistCard } from '../../components/chat/ChecklistCard';
-
-// Mock Data
-const ACTIVE_POLLS = [
-  {
-    id: 'p1',
-    groupName: 'Nhóm Phát Triển Mobile App',
-    question: 'Chiều mai 3h họp đc hết mà đúng ko?',
-    totalVotes: 12,
-    options: [
-      { id: 'opt1', text: 'Oke', votes: 11, votedByMe: true },
-      { id: 'opt2', text: 'Ko (nêu lý do)', votes: 1, votedByMe: false }
-    ]
-  },
-  {
-    id: 'p2',
-    groupName: 'Team Design',
-    question: 'Chốt màu chủ đạo mới?',
-    totalVotes: 5,
-    options: [
-      { id: 'o1', text: 'Blue', votes: 3, votedByMe: true },
-      { id: 'o2', text: 'Purple', votes: 2, votedByMe: false }
-    ]
-  }
-];
-
-const ACTIVE_CHECKLISTS = [
-  {
-    id: 'c1',
-    groupName: 'Nhóm Phát Triển Mobile App',
-    title: 'Chuẩn bị cho buổi họp',
-    items: [
-      { id: 'i1', text: 'Đọc trước tài liệu', completed: true },
-      { id: 'i2', text: 'Chuẩn bị câu hỏi', completed: false }
-    ]
-  }
-];
+import { getChecklists } from '../../services/checklistService';
+import { getPolls } from '../../services/pollService';
+import { Checklist, Poll } from '../../types';
 
 export const EventsDashboardScreen: React.FC = () => {
   const [viewMode, setViewMode] = useState<'list' | 'week'>('list');
+  const [polls, setPolls] = useState<any[]>([]);
+  const [checklists, setChecklists] = useState<Checklist[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  React.useEffect(() => {
+    loadData();
+  }, []);
+
+  const loadData = async () => {
+    try {
+      setLoading(true);
+      const [fetchedChecklists, fetchedPolls] = await Promise.all([
+        getChecklists().catch(() => []),
+        getPolls().catch(() => [])
+      ]);
+      setChecklists(fetchedChecklists);
+      setPolls(fetchedPolls);
+    } catch (e) {
+      console.log('Error loading events data', e);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -94,19 +84,19 @@ export const EventsDashboardScreen: React.FC = () => {
                   </TouchableOpacity>
                 </View>
                 <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.horizontalScroll}>
-                  {ACTIVE_POLLS.map(poll => (
+                  {polls.length > 0 ? polls.map(poll => (
                     <View key={poll.id} style={styles.cardWrapper}>
                       <View style={styles.groupBadge}>
                         <Ionicons name="people" size={14} color="#3B82F6" />
-                        <Text style={styles.groupContext}>{poll.groupName}</Text>
+                        <Text style={styles.groupContext}>{poll.groupName || 'Nhóm chung'}</Text>
                       </View>
                       <PollCard 
-                        question={poll.question}
-                        options={poll.options}
-                        totalVotes={poll.totalVotes}
+                        question={poll.question || 'Bình chọn'}
+                        options={poll.options || []}
+                        totalVotes={poll.totalVotes || 0}
                       />
                     </View>
-                  ))}
+                  )) : <Text style={styles.emptyListText}>Không có bình chọn nào đang mở.</Text>}
                 </ScrollView>
               </View>
 
@@ -119,18 +109,18 @@ export const EventsDashboardScreen: React.FC = () => {
                   </TouchableOpacity>
                 </View>
                 <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.horizontalScroll}>
-                  {ACTIVE_CHECKLISTS.map(checklist => (
+                  {checklists.length > 0 ? checklists.map(checklist => (
                     <View key={checklist.id} style={styles.cardWrapper}>
                       <View style={styles.groupBadge}>
                         <Ionicons name="people" size={14} color="#10B981" />
-                        <Text style={[styles.groupContext, { color: '#10B981' }]}>{checklist.groupName}</Text>
+                        <Text style={[styles.groupContext, { color: '#10B981' }]}>{checklist.roomId || 'Nhóm chung'}</Text>
                       </View>
                       <ChecklistCard 
                         title={checklist.title}
-                        items={checklist.items}
+                        items={checklist.items as any}
                       />
                     </View>
-                  ))}
+                  )) : <Text style={styles.emptyListText}>Không có checklist chung.</Text>}
                 </ScrollView>
               </View>
             </>
@@ -175,4 +165,5 @@ const styles = StyleSheet.create({
   emptyIconBox: { width: 64, height: 64, borderRadius: 32, backgroundColor: '#F8FAFC', alignItems: 'center', justifyContent: 'center', marginBottom: 16 },
   emptyTitle: { fontSize: 18, fontWeight: '700', color: '#0F172A', marginBottom: 8 },
   emptyText: { fontSize: 14, color: '#64748B', textAlign: 'center', lineHeight: 22 },
+  emptyListText: { fontSize: 14, color: '#94A3B8', fontStyle: 'italic', paddingVertical: 20 },
 });

@@ -11,6 +11,8 @@ import { Message } from '../../types';
 import { Avatar } from '../../components/ui/Avatar';
 import { PollCard } from '../../components/chat/PollCard';
 import { ChecklistCard } from '../../components/chat/ChecklistCard';
+import { getMe } from '../../services/userService';
+import { User } from '../../types';
 
 type Route = RouteProp<RootStackParamList, 'ChatRoom'>;
 
@@ -28,49 +30,38 @@ export const ChatRoomScreen: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [text, setText] = useState('');
   const [sending, setSending] = useState(false);
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
   const listRef = useRef<FlatList>(null);
 
-  const loadMessages = async () => {
+  const loadData = async () => {
     try {
       setLoading(true);
-      const data = await getRoomMessages(roomId);
       
-      const mockMessages: ExtendedMessage[] = [
-        { id: 'm1', roomId, senderId: 's1', senderName: 'Quốc Việt', content: 'Tuần sau tụi mình họp nha', isOwn: false, uiType: 'text', createdAt: new Date().toISOString() },
-        { id: 'm2', roomId, senderId: 's2', senderName: 'Bạn', content: 'Khi meet vậy ô?', isOwn: true, uiType: 'text', createdAt: new Date().toISOString() },
-        { id: 'm3', roomId, senderId: 's1', senderName: 'Quốc Việt', content: 'Để t check lịch của mng cái rồi chốt nhe', isOwn: false, uiType: 'text', createdAt: new Date().toISOString() },
-        { 
-          id: 'm4', roomId, senderId: 's1', senderName: 'Quốc Việt', content: '', isOwn: false, 
-          uiType: 'poll', 
-          createdAt: new Date().toISOString(),
-          pollData: {
-            question: 'Chiều mai 3h họp đc hết mà đúng ko?',
-            totalVotes: 12,
-            options: [
-              { id: 'opt1', text: 'Oke', votes: 11, votedByMe: true },
-              { id: 'opt2', text: 'Ko (nêu lý do)', votes: 1, votedByMe: false }
-            ]
-          }
-        },
-        { 
-          id: 'm5', roomId, senderId: 's3', senderName: 'Harry', content: '', isOwn: false, 
-          uiType: 'checklist', 
-          createdAt: new Date().toISOString(),
-          checklistData: {
-            title: 'Chuẩn bị cho buổi họp',
-            items: [
-              { id: 'i1', text: 'Đọc trước tài liệu', completed: true },
-              { id: 'i2', text: 'Chuẩn bị câu hỏi', completed: false }
-            ]
-          }
-        },
-      ];
+      let userData = null;
+      let data: Message[] = [];
       
-      setMessages([...data, ...mockMessages]);
-    } catch { } finally { setLoading(false); }
+      try {
+        userData = await getMe();
+      } catch (e) {
+        console.log('Error fetching user', e);
+      }
+      
+      try {
+        data = await getRoomMessages(roomId);
+      } catch (e) {
+        console.log('Error fetching messages', e);
+      }
+      
+      setCurrentUser(userData);
+      setMessages(data || []);
+    } catch (err) { 
+      console.log('Error loading messages', err);
+    } finally { 
+      setLoading(false); 
+    }
   };
 
-  useEffect(() => { loadMessages(); }, [roomId]);
+  useEffect(() => { loadData(); }, [roomId]);
 
   const handleSend = async () => {
     if (!text.trim()) return;
@@ -79,13 +70,13 @@ export const ChatRoomScreen: React.FC = () => {
     try {
       setSending(true);
       const msg = await sendMessage(roomId, content);
-      setMessages(prev => [...prev, { ...msg, uiType: 'text' }]);
+      setMessages(prev => [...prev, { ...msg, uiType: 'text', isOwn: true, senderId: currentUser?.id || 'me' }]);
       setTimeout(() => listRef.current?.scrollToEnd({ animated: true }), 100);
     } catch { } finally { setSending(false); }
   };
 
   const renderMessage = ({ item }: { item: ExtendedMessage }) => {
-    const isMine = item.isOwn ?? false;
+    const isMine = item.isOwn !== undefined ? item.isOwn : (currentUser && item.senderId === currentUser.id) || false;
     
     let customContent = null;
     if (item.uiType === 'poll' && item.pollData) {

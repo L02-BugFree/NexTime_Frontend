@@ -55,10 +55,18 @@ export const ROOM_ENDPOINTS = {
 // ─── Polls ──────────────────────────────────────────────────────────────────
 export const POLL_ENDPOINTS = {
   CREATE: '/polls',
+  GET_ALL: '/polls',
   VOTE: (pollId: string) => `/polls/${pollId}/vote`,
 } as const;
 
 // ─── Checklist / App ────────────────────────────────────────────────────────
 export const APP_ENDPOINTS = {
   ROOT: '/',
+} as const;
+
+// ─── Checklists ─────────────────────────────────────────────────────────────
+export const CHECKLIST_ENDPOINTS = {
+  GET_ALL: '/checklists',
+  PREVIEW: '/checklists/preview',
+  CONFIRM: '/checklists/confirm',
 } as const;
